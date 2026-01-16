@@ -1,0 +1,3 @@
+jwt:
+  secret: "ReplaceWithASecureRandomSecretKey"
+  expiration-in-ms: 3600000
