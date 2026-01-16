@@ -12,24 +12,21 @@ import org.springframework.security.authentication.BadCredentialsException;
 
 @Service
 public class AuthService {
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JWTProvider jwtProvider;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JWTProvider jwtProvider) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtProvider = jwtProvider;
-    }
+    private PasswordEncoder passwordEncoder;
 
-    public LoginResponse login(LoginRequest loginRequest) {
-        User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+    @Autowired
+    private JWTProvider jwtProvider;
+
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByUsername(request.getUsername());
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
-        String token = jwtProvider.generateToken(user);
+        String token = jwtProvider.generateToken(user.getUsername());
         return new LoginResponse(token);
     }
 }
